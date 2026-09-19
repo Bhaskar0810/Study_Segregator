@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Segregator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Background Starry Sky Canvas -->
+    <canvas id="stars-canvas"></canvas>
+
+    <!-- App Container -->
+    <div class="app-layout">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">⚡</div>
+                    <div class="brand-text">
+                        <h2>StudySegregator</h2>
+                        <span class="badge-sub">Auto Organizer</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Library Root Path Widget -->
+            <div class="library-box">
+                <div class="library-box-top">
+                    <span class="lib-label">BASE STORAGE</span>
+                    <button id="change-library-btn" class="icon-link-btn" title="Change Storage Folder">⚙️ Change</button>
+                </div>
+                <div class="library-path-text" id="library-path" title="Storage Directory">...</div>
+            </div>
+
+            <!-- Subjects Section -->
+            <div class="subjects-header">
+                <h3>SUBJECT TREE</h3>
+                <button id="add-subject-btn" class="icon-add-btn" title="Add Subject Category">
+                    <span>+ New</span>
+                </button>
+            </div>
+
+            <!-- Expandable Category & Subfolder Tree -->
+            <div class="tree-scroll-container">
+                <ul class="category-tree" id="category-tree">
+                    <!-- Dynamic nested tree loaded here -->
+                </ul>
+            </div>
+
+            <!-- Sidebar Footer Tips -->
+            <div class="sidebar-footer">
+                <div class="tip-card">
+                    <span class="tip-icon">💡</span>
+                    <span class="tip-text">Drop files onto any nested folder in the tree to sort directly into that subfolder!</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-workspace">
+            <!-- Top App Bar -->
+            <header class="app-header">
+                <div class="header-left">
+                    <div class="title-with-badge">
+                        <button id="nav-back-btn" class="btn btn-secondary nav-back-btn hidden" title="Go up one folder">⬅ Back</button>
+                        <h1 id="active-category-title">Operating Systems</h1>
+                        <span class="pill-badge" id="files-count-badge">0 items</span>
+                    </div>
+                    <div class="path-breadcrumb">
+                        <span class="breadcrumb-icon">📂</span>
+                        <span id="active-category-path" class="breadcrumb-path">C:\...</span>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <button id="open-folder-btn" class="btn btn-secondary" title="Open Folder in Windows Explorer">
+                        <span>Reveal in Explorer ↗</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- File Ingestion Section -->
+            <section class="ingestion-section">
+                <div class="ingestion-controls">
+                    <div class="target-selector-group">
+                        <label for="target-category-select">Segregate to:</label>
+                        <div class="select-wrapper">
+                            <select id="target-category-select"></select>
+                        </div>
+                    </div>
+
+                    <div class="mode-action-group">
+                        <button id="mode-toggle-btn" class="mode-pill mode-move" title="Click to toggle between Moving and Copying files">
+                            Mode: <strong>Move</strong>
+                        </button>
+                        <button id="browse-files-btn" class="btn btn-primary">
+                            <span class="btn-icon">📁</span>
+                            <span>Browse Files</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Drop Zone -->
+                <div class="drop-zone" id="drop-zone">
+                    <div class="drop-content">
+                        <div class="drop-icon-pulse">📥</div>
+                        <h3>Drop lecture PDFs, notes, slides or entire folders here</h3>
+                        <p>Files and folders will be automatically sorted into the selected directory on your computer.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Category Files Explorer View -->
+            <section class="explorer-section">
+                <div class="explorer-toolbar">
+                    <div class="explorer-title-group">
+                        <h3 id="explorer-title">Folder Contents</h3>
+                        <!-- View Switcher (Grid vs Graph) -->
+                        <div class="view-switch-group">
+                            <button id="view-grid-btn" class="view-btn active" title="Grid View">⊞ Grid</button>
+                            <button id="view-graph-btn" class="view-btn" title="OSINT Knowledge Graph">🌐 Graph</button>
+                        </div>
+                    </div>
+                    <div class="toolbar-actions">
+                        <button id="new-subfolder-btn" class="btn btn-secondary btn-sm" title="Create a new folder inside this subject">
+                            <span>+ Folder</span>
+                        </button>
+                        <div class="search-box">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="search-input" placeholder="Filter files and folders..." spellcheck="false">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Files Grid Container -->
+                <div class="files-container" id="files-container">
+                    <div class="files-grid" id="files-grid">
+                        <!-- Dynamic file cards rendered here -->
+                    </div>
+
+                    <!-- Empty State -->
+                    <div class="empty-state hidden" id="empty-state">
+                        <div class="empty-icon">📂</div>
+                        <h4 class="empty-title">This folder is empty</h4>
+                        <p class="empty-desc">Drop notes, PDFs, presentations or subfolders above to segregate them.</p>
+                    </div>
+                </div>
+
+                <!-- OSINT Knowledge Graph View Container -->
+                <div class="graph-container hidden" id="graph-container">
+                    <canvas id="graph-canvas"></canvas>
+                    <div class="graph-hud-controls">
+                        <button id="graph-zoom-in" class="hud-btn" title="Zoom In">+</button>
+                        <button id="graph-zoom-out" class="hud-btn" title="Zoom Out">-</button>
+                        <button id="graph-reset-view" class="hud-btn" title="Center View">⊙</button>
+                    </div>
+                    <div class="graph-legend">
+                        <span class="legend-item"><span class="legend-dot" style="background: #818cf8;"></span> Subject Hub</span>
+                        <span class="legend-item"><span class="legend-dot" style="background: #f59e0b;"></span> Subfolder</span>
+                        <span class="legend-item"><span class="legend-dot" style="background: #ef4444;"></span> PDF</span>
+                        <span class="legend-item"><span class="legend-dot" style="background: #3b82f6;"></span> Doc</span>
+                        <span class="legend-item"><span class="legend-dot" style="background: #06b6d4;"></span> Code</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Graph Node Tooltip -->
+    <div class="graph-tooltip hidden" id="graph-tooltip"></div>
+
+    <!-- Add Subject Modal -->
+    <div class="modal-overlay hidden" id="add-subject-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Add New Subject</h3>
+            </div>
+            <div class="modal-body">
+                <label for="new-subject-input">Subject or Folder Name:</label>
+                <input type="text" id="new-subject-input" placeholder="e.g., Cryptography, Database Systems..." autofocus>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-add-subject" class="btn btn-ghost">Cancel</button>
+                <button id="confirm-add-subject" class="btn btn-primary">Create Subject Folder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Subfolder Modal -->
+    <div class="modal-overlay hidden" id="add-subfolder-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Create New Subfolder</h3>
+            </div>
+            <div class="modal-body">
+                <label for="new-subfolder-input">Folder Name:</label>
+                <input type="text" id="new-subfolder-input" placeholder="e.g., Unit 1, Assignments, Lab 3..." autofocus>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-add-subfolder" class="btn btn-ghost">Cancel</button>
+                <button id="confirm-add-subfolder" class="btn btn-primary">Create Folder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="stars.js"></script>
+    <script src="graph.js"></script>
+    <script src="renderer.js"></script>
+</body>
+
+</html>
